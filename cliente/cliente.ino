@@ -63,6 +63,7 @@ String signal_to_server(String dato1,String dato2){
   final = final.length() + final;
   return final;
 }
+
 void setup(){
   pinMode(2,OUTPUT);
 
@@ -106,19 +107,17 @@ void loop()
         Serial.println("conexion fallida");//Texto
         return;
     }
-        Serial.println("enviando datos");//Texto
-      //Loop para el envio de datos
-      for(int i = 0; i<=2000;i++){
-          digitalWrite(2,HIGH);
-          client.print(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
-        }
+    Serial.println("enviando datos");//Texto
 
-    digitalWrite(2,LOW);
+    //Loop para el envio de datos
+    for(int i = 0; i<=2000;i++){
+          client.print(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
+    }
+
     Serial.println("Disconnecting...");
     client.stop();
 
     Serial.println("terminado");//Texto
     Serial.print("estado: ");
     Serial.println(client.connect(host, port));
-
 }
