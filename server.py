@@ -11,7 +11,8 @@ def funcion_datos():
     sensor1_dataframe =pd.DataFrame(datos)
     formato = "utf-8"
     s = socket.socket()
-    s.bind(('0.0.0.0', 8090)) #Asignamos la dirección Ip del host,así como el puerto que vamos
+    #Asignamos la dirección Ip del host,así como el puerto que vamos
+    s.bind(('0.0.0.0', 8090)) 
     #ocupar para iniciar la comunicación
     s.listen(0)
     client, addr = s.accept()
@@ -31,7 +32,6 @@ def funcion_datos():
                 contador = contador +1
             ##Convertimos en lista la cadena que acabamos de recibir:
             lista = texto.split()
-            #print(lista)
             sensor1_dataframe.loc[len(sensor1_dataframe)] = lista
 
     if(sensor1_dataframe.empty == False):
