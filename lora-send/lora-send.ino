@@ -1,19 +1,19 @@
-#include <WiFi.h>
-// WiFi network info.
-//datos de mi casa
-/*
-const char* ssid = "Guzman";
-const char* password =  "7r2r-ta94-to3p";
- 
-const uint16_t port = 8090;
-const char * host = "192.168.0.15";
-*/
-const char* ssid = "residencia2022";
-const char* password =  "electronica2022";
- 
-const uint16_t port = 8090;
-const char * host = "192.168.0.198";
+//Libraries for LoRa
+#include <SPI.h>
+#include <LoRa.h>
 
+//define the pins used by the LoRa transceiver module
+#define SCK 5
+#define MISO 19
+#define MOSI 27
+#define SS 18
+#define RST 23
+#define DIO0 26
+
+//433E6 for Asia
+//866E6 for Europe
+//915E6 for North America
+#define BAND 915E6
 
 #include "Wire.h" 
 const int MPU_ADDR1 = 0x68;
@@ -65,12 +65,9 @@ String signal_to_server(String dato1,String dato2){
 }
 
 void setup(){
-  pinMode(2,OUTPUT);
 
- //configurando el puerto serie
-  Serial.begin(115200);
-
-//prueba de comunicación del puerto i2c
+    Serial.begin(115200);
+    //prueba de comunicación del puerto i2c
     Wire.begin();
     Wire.beginTransmission(MPU_ADDR1); // Begins a transmission to the I2C slave (GY-521 board)
     Wire.write(0x6B); // PWR_MGMT_1 register
@@ -82,42 +79,34 @@ void setup(){
     Wire.write(0x6B); // PWR_MGMT_1 register
     Wire.write(0); // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
+
+    //Iniciando el modulo lora
+    Serial.println("LoRa Sender Test");
+
+    //SPI LoRa pins
+    SPI.begin(SCK, MISO, MOSI, SS);
+    //setup LoRa transceiver module
+    LoRa.setPins(SS, RST, DIO0);
   
-    //iniciamos el wifi
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-      //conectando
-        Serial.println("...");
-      delay(500);//tiempos     
+    if (!LoRa.begin(BAND)) {
+        Serial.println("Starting LoRa failed!");
+        while (1);
     }
-
-    Serial.println("WiFi conectado a IP: ");//Texto
-    Serial.println(WiFi.localIP());
-    delay(500);
+    Serial.println("LoRa Initializing OK!");
+    delay(2000);
 }
- 
-void loop()
-  {
 
-    WiFiClient client;
- 
-    if (!client.connect(host, port)) {
-        Serial.print("estado: ");
-        Serial.println(client.connect(host, port));
-        Serial.println("conexion fallida");//Texto
-        return;
-    }
-    Serial.println("enviando datos");//Texto
+void loop(){
+    Serial.println("Sending packet: ");
 
+    //Send LoRa packet to receiver
+    
     //Loop para el envio de datos
     for(int i = 0; i<=2000;i++){
-          client.print(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
+        LoRa.beginPacket();
+        LoRa.print(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
+        LoRa.endPacket();
+
     }
-
-    Serial.println("Disconnecting...");
-    client.stop();
-
-    Serial.println("terminado");//Texto
-    Serial.print("estado: ");
-    Serial.println(client.connect(host, port));
+  
 }
