@@ -32,6 +32,7 @@ def threaded_client(connection):
         tamano =connection.recv(2).decode(formato)
         if len(tamano) ==0:
             connection.close()
+            print("error, no data from: " + address[0]+ "\n")
             break
         else:
             #print("tamano: "+ tamano + "from " + address[0])
@@ -46,19 +47,20 @@ def threaded_client(connection):
             sensor_dataframe.loc[len(sensor_dataframe)] = lista
 
     if(sensor_dataframe.empty == False):
-        print("Closing connection from:"+ address[0] + "\n")
+        print("Successful, closing connection from:"+ address[0] + "\n")
         connection.close()
         tiempo = datetime.datetime.now()
-        archivo1 =address[0] + " " + tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor1.csv"
-        sensor_dataframe.to_csv(archivo1,header=False,index=False)
-        print(tiempo)
+        archivo = address[0] + " " + tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor.csv"
+        sensor_dataframe.to_csv(archivo,header=False,index=False)
+        
         sensor1_dataframe = 0
     else:
-        print("no data from " + address[0] + "\n")
+        print("no data from " + address[0] + " ,closing connection\n")
+        connection.close()
 
 while True:
     Client, address = ServerSocket.accept()
-    print('Connected to: ' + address[0] + ':' + str(address[1]) + "\n")
+    print( 'Connected to: ' + address[0] + ':' + str(address[1]) + "\n")
     start_new_thread(threaded_client, (Client, ))
     #ThreadCount += 1
     #print('Thread Number: ' + str(ThreadCount))

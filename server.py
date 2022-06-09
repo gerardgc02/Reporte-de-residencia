@@ -38,8 +38,8 @@ def funcion_datos():
         print("Closing connection")
         client.close()
         tiempo = datetime.datetime.now()
-        archivo1 =tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor.csv"
-        sensor1_dataframe.to_csv(archivo1,header=False)
+        archivo =tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor.csv"
+        sensor1_dataframe.to_csv(archivo,header=False, index=False)
         print(tiempo)
 while True:
     time.sleep(1)
