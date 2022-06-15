@@ -8,8 +8,9 @@ import pandas as pd
 import time
 
 ServerSocket = socket.socket()
+#ServerSocket.settimeout(5)
 host = '0.0.0.0'
-port = 8090
+port = 8091
 ThreadCount = 0
 
 try:
@@ -19,20 +20,20 @@ except socket.error as e:
 
 print('Waiting for a Connection..')
 ServerSocket.listen(5)
-
+datos = {'Sensor':[],'X':[],'acx':[],'y':[],'acy':[],'Z':[],'acz':[],'tiempo':[],'tiempo_uS':[],'Sensor2':[],'X2':[],'acx2':[],'y2':[],'acy2':[],'Z2':[],'acz2':[],'tiempo2':[],'tiempo_uS2':[]}
+    
 def threaded_client(connection):
-    datos = {'Sensor':[],'X':[],'acx':[],'y':[],'acy':[],'Z':[],'acz':[],'tiempo':[],'tiempo_uS':[],'Sensor2':[],'X2':[],'acx2':[],'y2':[],'acy2':[],'Z2':[],'acz2':[],'tiempo2':[],'tiempo_uS2':[]}
     #creando dataframes para los datos:
     sensor_dataframe =pd.DataFrame(datos)
     #print(sensor1_dataframe)
     formato = "utf-8"
-    while(1):
+    while True:
         #print('ejecutando...')
         texto = ""
         tamano =connection.recv(2).decode(formato)
         if len(tamano) ==0:
             connection.close()
-            print("error, no data from: " + address[0]+ "\n")
+            print("error tamano = "+ tamano + ", no data from: " + address[0]+ " exit\n")
             break
         else:
             #print("tamano: "+ tamano + "from " + address[0])
@@ -60,7 +61,7 @@ def threaded_client(connection):
 
 while True:
     Client, address = ServerSocket.accept()
-    print( 'Connected to: ' + address[0] + ':' + str(address[1]) + "\n")
+    print( 'Connected to: ' + address[0] + ':' + str(address[1]) + "!\n")
     start_new_thread(threaded_client, (Client, ))
     #ThreadCount += 1
     #print('Thread Number: ' + str(ThreadCount))

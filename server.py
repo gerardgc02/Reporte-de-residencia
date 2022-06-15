@@ -5,6 +5,8 @@ import datetime
 import pandas as pd
 import time
 
+port = int(input("inserte el puerto de comunicacion con el servidor: "))
+
 def funcion_datos():
     datos = {'Sensor':[],'X':[],'acx':[],'y':[],'acy':[],'Z':[],'acz':[],'tiempo':[],'tiempo_uS':[],'Sensor2':[],'X2':[],'acx2':[],'y2':[],'acy2':[],'Z2':[],'acz2':[],'tiempo2':[],'tiempo_uS2':[]}
     #creando dataframes para los datos:
@@ -12,13 +14,13 @@ def funcion_datos():
     formato = "utf-8"
     s = socket.socket()
     #Asignamos la dirección Ip del host,así como el puerto que vamos
-    s.bind(('0.0.0.0', 8090)) 
+    s.bind(('0.0.0.0', port)) 
     #ocupar para iniciar la comunicación
     s.listen(0)
     client, addr = s.accept()
-
+    print('recibiendo desde '+addr[0]+ ' ejecutando...')
+    
     while(1):
-        print('ejecutando...')
         texto = ""
         tamano =client.recv(2).decode(formato)
         if len(tamano) ==0:
@@ -38,9 +40,9 @@ def funcion_datos():
         print("Closing connection")
         client.close()
         tiempo = datetime.datetime.now()
-        archivo =tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor.csv"
+        archivo =addr[0] + " " + tiempo.strftime('%d-%m-%Y %H %M %S ') + "datos sensor.csv"
         sensor1_dataframe.to_csv(archivo,header=False, index=False)
-        print(tiempo)
+        
 while True:
     time.sleep(1)
     funcion_datos()

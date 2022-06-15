@@ -1,23 +1,3 @@
-#include <WiFi.h>
-// WiFi network info.
-//datos de mi casa
-/*
-const char* ssid = "Guzman";
-const char* password =  "7r2r-ta94-to3p";
- 
-const uint16_t port = 8090;
-const char * host = "192.168.0.19";
-*/
-const char* ssid = "residencia2022";
-const char* password =  "electronica2022";
- 
-const uint16_t port = 8090;
-//mi pc ip
-//const char * host = "192.168.0.198";
-//Raspberry pi ip
-const char * host = "192.168.0.20";
-
-
 #include "Wire.h" 
 const int MPU_ADDR1 = 0x68;
 const int MPU_ADDR2 = 0x69;
@@ -27,7 +7,6 @@ String mpu_data(int direccion){
   ///////////////////////////////////////////////////////////////////////////////
           //Variables de los datos del sensor
           int16_t accelerometer_x, accelerometer_y, accelerometer_z;
-          float Ams2[2];
           String AcSensor; 
           unsigned long tiempo1, tiempo2;
           tiempo1= micros();
@@ -41,11 +20,6 @@ String mpu_data(int direccion){
           accelerometer_y = Wire.read()<<8 | Wire.read(); // reading registers: 0x3D (ACCEL_YOUT_H) and 0x3E (ACCEL_YOUT_L)
           accelerometer_z = Wire.read()<<8 | Wire.read(); // reading registers: 0x3F (ACCEL_ZOUT_H) and 0x40 (ACCEL_ZOUT_L)
           tiempo2 = micros() -tiempo1;
-          
-          Ams2[0] = accelerometer_x*(9.81/16384.0);
-          Ams2[1] = accelerometer_y*(9.81/16384.0);
-          Ams2[2] = accelerometer_z*(9.81/16384.0);
-          
          //////////////////////////////////////////////////////////////////////////////////
           switch (direccion)
           {
@@ -57,11 +31,11 @@ String mpu_data(int direccion){
           break;
           }
           
-          AcSensor +=Ams2[0];
+          AcSensor +=accelerometer_x;
           AcSensor += String(" Y ");
-          AcSensor +=Ams2[1];
+          AcSensor +=accelerometer_y;
           AcSensor += String(" Z ");
-          AcSensor +=Ams2[2];
+          AcSensor +=accelerometer_z;
           AcSensor +=String(" t_us ");
           AcSensor +=tiempo2;
           return AcSensor;
@@ -73,10 +47,10 @@ String signal_to_server(String dato1,String dato2){
   return final;
 }
 
-void setup(){
-  pinMode(2,OUTPUT);
 
- //configurando el puerto serie
+
+void setup() {
+   //configurando el puerto serie
   Serial.begin(115200);
 
 //prueba de comunicación del puerto i2c
@@ -86,47 +60,14 @@ void setup(){
     Wire.write(0); // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
     
-    Wire.begin(19,22);
+    Wire.begin();
     Wire.beginTransmission(MPU_ADDR2); // Begins a transmission to the I2C slave (GY-521 board)
     Wire.write(0x6B); // PWR_MGMT_1 register
     Wire.write(0); // set to zero (wakes up the MPU-6050)
     Wire.endTransmission(true);
-  
-    //iniciamos el wifi
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-      //conectando
-        Serial.println("...");
-      delay(500);//tiempos     
-    }
 
-    Serial.println("WiFi conectado a IP: ");//Texto
-    Serial.println(WiFi.localIP());
-    delay(500);
 }
- 
-void loop()
-  {
 
-    WiFiClient client;
- 
-    if (!client.connect(host, port)) {
-        Serial.print("estado: ");
-        Serial.println(client.connect(host, port));
-        Serial.println("conexion fallida");//Texto
-        return;
-    }
-    Serial.println("enviando datos");//Texto
-
-    //Loop para el envio de datos
-    for(int i = 0; i<=5000;i++){
-          client.print(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
-    }
-
-    Serial.println("Disconnecting...");
-    client.stop();
-
-    Serial.println("terminado");//Texto
-    Serial.print("estado: ");
-    Serial.println(client.connect(host, port));
+void loop() {
+  Serial.println(signal_to_server(mpu_data(MPU_ADDR1),mpu_data(MPU_ADDR2)));
 }
