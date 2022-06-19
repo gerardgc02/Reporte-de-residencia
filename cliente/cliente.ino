@@ -23,11 +23,17 @@ const int MPU_ADDR1 = 0x68;
 const int MPU_ADDR2 = 0x69;
 
 
+//Variables del filtro pasabajas de tipo flotante:
+float Ams2ant[2];
+float Ams2[2];
+
 String mpu_data(int direccion){
   ///////////////////////////////////////////////////////////////////////////////
           //Variables de los datos del sensor
           int16_t accelerometer_x, accelerometer_y, accelerometer_z;
-          float Ams2[2];
+          
+          const float T =100;
+          const float RC = 628.32;
           String AcSensor; 
           unsigned long tiempo1, tiempo2;
           tiempo1= micros();
@@ -45,7 +51,13 @@ String mpu_data(int direccion){
           Ams2[0] = accelerometer_x*(9.81/16384.0);
           Ams2[1] = accelerometer_y*(9.81/16384.0);
           Ams2[2] = accelerometer_z*(9.81/16384.0);
+          //filtrando datos:
+          //Salida = (T/(T+RC))*senal actual + (RC/(T+RC))*dato anterior
           
+          for(int i = 0;i<3;i++){
+          Ams2[i] = (T/(T+RC))*Ams2[i] + (RC/(T+RC))*Ams2ant[i];
+          Ams2ant[i] = Ams2[i];
+          }
          //////////////////////////////////////////////////////////////////////////////////
           switch (direccion)
           {
