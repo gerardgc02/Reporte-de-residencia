@@ -24,8 +24,11 @@ const int MPU_ADDR2 = 0x69;
 
 
 //Variables del filtro pasabajas de tipo flotante:
-float Ams2ant[2];
-float Ams2[2];
+float Ams2antS1[2];
+float Ams2S1[2];
+
+float Ams2antS2[2];
+float Ams2S2[2];
 
 String mpu_data(int direccion){
   ///////////////////////////////////////////////////////////////////////////////
@@ -48,23 +51,34 @@ String mpu_data(int direccion){
           accelerometer_z = Wire.read()<<8 | Wire.read(); // reading registers: 0x3F (ACCEL_ZOUT_H) and 0x40 (ACCEL_ZOUT_L)
           tiempo2 = micros() -tiempo1;
           
-          Ams2[0] = accelerometer_x*(9.81/16384.0);
-          Ams2[1] = accelerometer_y*(9.81/16384.0);
-          Ams2[2] = accelerometer_z*(9.81/16384.0);
-          //filtrando datos:
-          //Salida = (T/(T+RC))*senal actual + (RC/(T+RC))*dato anterior
           
-          for(int i = 0;i<3;i++){
-          Ams2[i] = (T/(T+RC))*Ams2[i] + (RC/(T+RC))*Ams2ant[i];
-          Ams2ant[i] = Ams2[i];
-          }
          //////////////////////////////////////////////////////////////////////////////////
           switch (direccion)
           {
-          case MPU_ADDR1/* constant-expression */:
+          case MPU_ADDR1:
+            Ams2S1[0] = accelerometer_x*(9.81/16384.0);
+            Ams2S1[1] = accelerometer_y*(9.81/16384.0);
+            Ams2S1[2] = accelerometer_z*(9.81/16384.0);
+            //filtrando datos:
+            //Salida = (T/(T+RC))*senal actual + (RC/(T+RC))*dato anterior
+          
+            for(int i = 0;i<3;i++){
+              Ams2S1[i] = (T/(T+RC))*Ams2S1[i] + (RC/(T+RC))*Ams2antS1[i];
+              Ams2antS1[i] = Ams2S1[i];
+            }
             AcSensor = String(" s1 X ");
           break;
           case MPU_ADDR2:
+            Ams2S2[0] = accelerometer_x*(9.81/16384.0);
+            Ams2S2[1] = accelerometer_y*(9.81/16384.0);
+            Ams2S2[2] = accelerometer_z*(9.81/16384.0);
+            //filtrando datos:
+            //Salida = (T/(T+RC))*senal actual + (RC/(T+RC))*dato anterior
+          
+            for(int i = 0;i<3;i++){
+              Ams2S2[i] = (T/(T+RC))*Ams2S2[i] + (RC/(T+RC))*Ams2antS2[i];
+              Ams2antS2[i] = Ams2S2[i];
+            }
           AcSensor = String(" s2 X ");
           break;
           }
